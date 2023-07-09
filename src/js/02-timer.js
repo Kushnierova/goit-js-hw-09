@@ -33,7 +33,7 @@ class CountDownTimer {
   updateMarkup() {
     setInterval(() => {
       const currentTime = Dane.now();
-      const delta = this.targetDate - currentTime;
+      const delta = this.targetDate - currentTime;n
     }, 1000);
   }
 
