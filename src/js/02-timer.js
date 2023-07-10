@@ -16,9 +16,9 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    const selectedTime = selectedDates[0];
-    const currentTime = new Date();
-    if (selectedTime < currentTime) {
+    const selectedDate = selectedDates[0];
+    const currentDate = new Date();
+    if (selectedDate < currentDate) {
       startBtn.disabled = true;
       window.alert('Please choose a date in the future');
     } else {
@@ -31,30 +31,32 @@ const pickrTime = flatpickr(dateInput, options);
 
 class CountDownTimer {
   constructor({ selector, targetDate }) {
-    this.intervalId = null
+    this.intervalId = null;
     this.targetDate = targetDate;
     this.daysSpan = document.querySelector(`${selector} [data-days]`);
     this.hoursSpan = document.querySelector(`${selector} [data-hours]`);
     this.minutesSpan = document.querySelector(`${selector} [data-minutes]`);
     this.secondsSpan = document.querySelector(`${selector} [data-seconds]`);
   }
+
   updateMarkup() {
-    setInterval(() => {
-      this.intervalId = setInterval(() => {
-        const currentTime = Dane.now();
-        const delta = this.targetDate - currentTime;
-        if (delta < 999) {
-          clearInterval(this.intervalId);
-        }
-      });
+    this.intervalId = setInterval(() => {
+      const currentTime = Date.now();
+      const delta = this.targetDate - currentTime;
+      if (delta < 999) {
+        clearInterval(this.intervalId);
+      }
       const { days, hours, minutes, seconds } = this.convertMs(delta);
 
       this.daysSpan.textContent = addLeadingZero(days);
       this.hoursSpan.textContent = addLeadingZero(hours);
       this.minutesSpan.textContent = addLeadingZero(minutes);
       this.secondsSpan.textContent = addLeadingZero(seconds);
+      console.log('new interval');
+      console.log(delta);
     }, 1000);
   }
+
   convertMs(ms) {
     const second = 1000;
     const minute = second * 60;
