@@ -1,5 +1,5 @@
-import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 function addLeadingZero(value) {
   return String(value).padStart(2, '0');
@@ -10,28 +10,28 @@ const startBtn = document.querySelector('[data-start]');
 
 startBtn.disabled = true;
 
-  const options = {
-    enableTime: true,
-    time_24hr: true,
-    defaultDate: new Date(),
-    minuteIncrement: 1,
-    onClose(selectedDates) {
-      console.log(selectedDates[0]);
-      const selectedTime = selectedDates[0].getTime();
-      const currentTime = Date.now();
-      const remainingTime = selectedTime - currentTime;
-      if (remainingTime < 0) {
-        alert('Please choose a date in the future');
-      } else {
-        startBtn.disabled = false;
-      }
-    },
-  };
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose(selectedDates) {
+    const selectedTime = selectedDates[0];
+    const currentTime = new Date();
+    if (selectedTime < currentTime) {
+      startBtn.disabled = true;
+      window.alert('Please choose a date in the future');
+    } else {
+      startBtn.disabled = false;
+    }
+  },
+};
 
-  const pickrTime = flatpickr(dateInput, options);
+const pickrTime = flatpickr(dateInput, options);
 
 class CountDownTimer {
   constructor({ selector, targetDate }) {
+    this.intervalId = null
     this.targetDate = targetDate;
     this.daysSpan = document.querySelector(`${selector} [data-days]`);
     this.hoursSpan = document.querySelector(`${selector} [data-hours]`);
@@ -40,8 +40,13 @@ class CountDownTimer {
   }
   updateMarkup() {
     setInterval(() => {
-      const currentTime = Dane.now();
-      const delta = this.targetDate - currentTime;
+      this.intervalId = setInterval(() => {
+        const currentTime = Dane.now();
+        const delta = this.targetDate - currentTime;
+        if (delta < 999) {
+          clearInterval(this.intervalId);
+        }
+      });
       const { days, hours, minutes, seconds } = this.convertMs(delta);
 
       this.daysSpan.textContent = addLeadingZero(days);
