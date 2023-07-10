@@ -1,42 +1,55 @@
-import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
+}
 
 const dateInput = document.querySelector('#datetime-picker');
 const startBtn = document.querySelector('[data-start]');
 
-const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  onClose(selectedDates) {
-    const selectedTime = selectedDates[0].getTime();
-    const currentTime = Date.now();
-    const remainingTime = selectedTime - currentTime;
-    if (remainingTime < 0) {
-      alert('Please choose a date in the future');
-    } else {
-      startBtn.disabled = false;
-    }
-  },
-};
+startBtn.disabled = true;
+
+  const options = {
+    enableTime: true,
+    time_24hr: true,
+    defaultDate: new Date(),
+    minuteIncrement: 1,
+    onClose(selectedDates) {
+      console.log(selectedDates[0]);
+      const selectedTime = selectedDates[0].getTime();
+      const currentTime = Date.now();
+      const remainingTime = selectedTime - currentTime;
+      if (remainingTime < 0) {
+        alert('Please choose a date in the future');
+      } else {
+        startBtn.disabled = false;
+      }
+    },
+  };
+
+  const pickrTime = flatpickr(dateInput, options);
 
 class CountDownTimer {
   constructor({ selector, targetDate }) {
     this.targetDate = targetDate;
-    this.selector - selector;
-    this.daysEl = document.querySelector('span[data-days]');
-    this.hoursEl = document.querySelector('span[data-hours]');
-    this.minutesEl = document.querySelector('span[data-minutes]');
-    this.secondsEl = document.querySelector('span[data-seconds]');
+    this.daysSpan = document.querySelector(`${selector} [data-days]`);
+    this.hoursSpan = document.querySelector(`${selector} [data-hours]`);
+    this.minutesSpan = document.querySelector(`${selector} [data-minutes]`);
+    this.secondsSpan = document.querySelector(`${selector} [data-seconds]`);
   }
   updateMarkup() {
     setInterval(() => {
       const currentTime = Dane.now();
-      const delta = this.targetDate - currentTime;n
+      const delta = this.targetDate - currentTime;
+      const { days, hours, minutes, seconds } = this.convertMs(delta);
+
+      this.daysSpan.textContent = addLeadingZero(days);
+      this.hoursSpan.textContent = addLeadingZero(hours);
+      this.minutesSpan.textContent = addLeadingZero(minutes);
+      this.secondsSpan.textContent = addLeadingZero(seconds);
     }, 1000);
   }
-
   convertMs(ms) {
     const second = 1000;
     const minute = second * 60;
@@ -50,12 +63,15 @@ class CountDownTimer {
 
     return { days, hours, minutes, seconds };
   }
-  addLeadingZero(value) {
-    return String(value).padStart(2, '0')}
-  }
-const timer1 = new CountDownTimer({
-  selector: '#timer-1',
-  targetDate: new Date('Jan 1, 2024'),
+}
+
+startBtn.addEventListener('click', () => {
+  const selectedDate = pickrTime.selectedDates[0];
+  const timer = new CountDownTimer({
+    selector: '.timer',
+    targetDate: selectedDate,
+  });
+  timer.updateMarkup();
+  dateInput.disabled = true;
+  startBtn.disabled = true;
 });
-//   addLeadingZero(value) {
-//     return String(value).padStart(2, '0')}
