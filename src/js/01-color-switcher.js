@@ -6,7 +6,7 @@ const stopBtn = document.querySelector('button[data-stop]');
 
 stopBtn.disabled = true;
 
-let timerId = null;
+let intervalId = null;
 
 function changeBgColorRandom() {
   bodyEl.style.backgroundColor = `${randomBodyColorGen.getRandomHexColor()}`;
