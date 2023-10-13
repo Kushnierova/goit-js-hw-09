@@ -12,7 +12,6 @@ function changeBgColorRandom() {
   bodyEl.style.backgroundColor = `${randomBodyColorGen.getRandomHexColor()}`;
 }
 const randomBodyColorGen = {
-
   getRandomHexColor() {
     return `#${Math.floor(Math.random() * 16777215)
       .toString(16)
@@ -27,21 +26,21 @@ const randomBodyColorGen = {
   },
 
   stop() {
-    clearInterval(intervalId);
-    stopBtn.disabled = true;
-    startBtn.disabled = false;
+    stopBtn.addEventListener('click', () => {
+      clearInterval(intervalId);
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    });
   },
 
   start() {
     startBtn.addEventListener('click', () => {
-      this.interval();
       startBtn.disabled = true;
       stopBtn.disabled = false;
+      this.interval();
     });
     stopBtn.addEventListener('click', this.stop);
   },
-
-
 };
 
 randomBodyColorGen.start();
