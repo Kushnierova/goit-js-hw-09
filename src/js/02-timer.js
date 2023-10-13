@@ -15,10 +15,10 @@ const options = {
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
-  onClose(selectedDates) {
-    const selectedDate = selectedDates[0];
-    const currentDate = new Date();
-    if (selectedDate < currentDate) {
+  onClose([selectedDates]) {
+    // const selectedDate = selectedDates[0];
+    const currentDate = Date.now();
+    if (selectedDates < currentDate) {
       startBtn.disabled = true;
       window.alert('Please choose a date in the future');
     } else {
@@ -52,8 +52,6 @@ class CountDownTimer {
       this.hoursSpan.textContent = addLeadingZero(hours);
       this.minutesSpan.textContent = addLeadingZero(minutes);
       this.secondsSpan.textContent = addLeadingZero(seconds);
-      console.log('new interval');
-      console.log(delta);
     }, 1000);
   }
 
@@ -63,14 +61,16 @@ class CountDownTimer {
     const hour = minute * 60;
     const day = hour * 24;
 
-    const days = Math.floor(ms / day);
-    const hours = Math.floor((ms % day) / hour);
-    const minutes = Math.floor(((ms % day) % hour) / minute);
-    const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+    const days = this.addLeadingZero(Math.floor(ms / day));
+    const hours = this.addLeadingZero(Math.floor((ms % day) / hour));
+    const minutes = this.addLeadingZero(Math.floor(((ms % day) % hour) / minute));
+    const seconds = this.addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
 
     return { days, hours, minutes, seconds };
   }
 }
+addLeadingZero(value) {
+  return String(value).padStart(2, '0')}
 
 startBtn.addEventListener('click', () => {
   const selectedDate = pickrTime.selectedDates[0];
