@@ -1,57 +1,59 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-function addLeadingZero(value) {
-  return String(value).padStart(2, '0');
-}
-
-const dateInput = document.querySelector('#datetime-picker');
-const startBtn = document.querySelector('[data-start]');
-
-startBtn.disabled = true;
+const refs = {
+  dateInput: document.querySelector('#datetime-picker'),
+  startBtn: document.querySelector('button[data-start]'),
+  daysSpan: document.querySelector(`span[data-days]`),
+  hoursSpan: document.querySelector(`span[data-hours]`),
+  minutesSpan: document.querySelector(`span[data-minutes]`),
+  secondsSpan: document.querySelector(`span[data-seconds]`),
+};
 
 const options = {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
-  onClose([selectedDates]) {
-    // const selectedDate = selectedDates[0];
-    const currentDate = Date.now();
-    if (selectedDates < currentDate) {
-      startBtn.disabled = true;
-      window.alert('Please choose a date in the future');
+  onClose(selectedDates) {
+    const selectedTime = selectedDates[0].getTime();
+    const currentTime = Date.now();
+    const remainingTime = selectedTime - currentTime;
+    if (remainingTime < 0) {
+      alert('Please choose a date in the future');
     } else {
-      startBtn.disabled = false;
+      refs.startBtn.disabled = false;
     }
   },
 };
 
-const pickrTime = flatpickr(dateInput, options);
+refs.startBtn.disabled = true;
+const selectedTime = flatpickr('#datetime-picker', options);
 
-class CountDownTimer {
-  constructor({ selector, targetDate }) {
+class Timer {
+  constructor({ onTick }) {
     this.intervalId = null;
-    this.targetDate = targetDate;
-    this.daysSpan = document.querySelector(`${selector} [data-days]`);
-    this.hoursSpan = document.querySelector(`${selector} [data-hours]`);
-    this.minutesSpan = document.querySelector(`${selector} [data-minutes]`);
-    this.secondsSpan = document.querySelector(`${selector} [data-seconds]`);
+    this.onTick = onTick;
   }
 
   updateMarkup() {
+    const selectedTimeStr = selectedTime.selectedDates[0].getTime();
+
     this.intervalId = setInterval(() => {
       const currentTime = Date.now();
-      const delta = this.targetDate - currentTime;
-      if (delta < 999) {
-        clearInterval(this.intervalId);
-      }
-      const { days, hours, minutes, seconds } = this.convertMs(delta);
+      const remainingTime = selectedTimeStr - currentTime;
 
-      this.daysSpan.textContent = addLeadingZero(days);
-      this.hoursSpan.textContent = addLeadingZero(hours);
-      this.minutesSpan.textContent = addLeadingZero(minutes);
-      this.secondsSpan.textContent = addLeadingZero(seconds);
+      if (remainingTime < 0) {
+        const time = this.convertMs(0);
+        clearInterval(this.intervalId);
+        refs.startBtn.disabled = false;
+        this.onTick(time);
+      } else {
+        const time = this.convertMs(remainingTime);
+        refs.startBtn.disabled = true;
+        refs.dateInput.disabled = true;
+        this.onTick(time);
+      }
     }, 1000);
   }
 
@@ -63,22 +65,30 @@ class CountDownTimer {
 
     const days = this.addLeadingZero(Math.floor(ms / day));
     const hours = this.addLeadingZero(Math.floor((ms % day) / hour));
-    const minutes = this.addLeadingZero(Math.floor(((ms % day) % hour) / minute));
-    const seconds = this.addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
+    const minutes = this.addLeadingZero(
+      Math.floor(((ms % day) % hour) / minute)
+    );
+    const seconds = this.addLeadingZero(
+      Math.floor((((ms % day) % hour) % minute) / second)
+    );
 
     return { days, hours, minutes, seconds };
   }
-}
-addLeadingZero(value) {
-  return String(value).padStart(2, '0')}
 
-startBtn.addEventListener('click', () => {
-  const selectedDate = pickrTime.selectedDates[0];
-  const timer = new CountDownTimer({
-    selector: '.timer',
-    targetDate: selectedDate,
-  });
-  timer.updateMarkup();
-  dateInput.disabled = true;
-  startBtn.disabled = true;
+  addLeadingZero(value) {
+    return String(value).padStart(2, '0');
+  }
+}
+
+const timer = new Timer({
+  onTick: updateClockFace,
 });
+
+refs.startBtn.addEventListener('click', timer.updateMarkup.bind(timer));
+
+function updateClockFace({ days, hours, minutes, seconds }) {
+  refs.daysSpan.textContent = `${days}`;
+  refs.hoursSpan.textContent = `${hours}`;
+  refs.minutesSpan.textContent = `${minutes}`;
+  refs.secondsSpan.textContent = `${seconds}`;
+}

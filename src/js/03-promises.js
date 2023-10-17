@@ -38,5 +38,5 @@ function handleSubmit(e) {
         console.log(`❌ Rejected promise ${position} in ${delay}ms`);
       });
   }
-  form.reset();
+  e.target.reset();
 }
